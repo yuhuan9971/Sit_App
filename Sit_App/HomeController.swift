@@ -14,7 +14,9 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     var accounts: [[String: AnyObject]] = [] {
         didSet {
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
     
@@ -36,7 +38,6 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         setUpViews()
-        SitApplication().test()
         fetchAccounts()
         // Do any additional setup after loading the view.
     }
@@ -55,7 +56,9 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     func fetchAccounts() {
-        SitApplication().getFromServer(path: "/accounts", data: nil) { (data) in
+        var dic:[String:AnyObject] = ["code" : "hello","msg" : "I am post data to server from my ios devices"] as [String:AnyObject]
+        
+        SitApplication().postFromServer(path: "/account/new", data: dic) { (data) in
             print(String(data: data, encoding: .utf8))
         }
     }
