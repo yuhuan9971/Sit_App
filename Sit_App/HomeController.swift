@@ -12,7 +12,7 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     private let cellId = "cellId"
     
-    var accounts: [[String: AnyObject]] = [] {
+    var accounts: [Account] = [] {
         didSet {
             DispatchQueue.main.async {
                 self.tableView.reloadData()
@@ -52,14 +52,20 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     @objc func handleAddAccount() {
-        print("handle add account")
+        let data = ["note":"lunch","amounts":400] as [String:AnyObject]
+        SitApplication.shared.postToServer(path: "/account/new", data: data) { (data) in
+            
+        }
     }
     
     func fetchAccounts() {
-        var dic:[String:AnyObject] = ["code" : "hello","msg" : "I am post data to server from my ios devices"] as [String:AnyObject]
-        
-        SitApplication().postFromServer(path: "/account/new", data: dic) { (data) in
-            print(String(data: data, encoding: .utf8))
+        SitApplication.shared.getFromServer(path: "/accounts", data: nil) { (data) in
+            do {
+                let accounts = try JSONDecoder().decode([Account].self, from: data)
+                self.accounts = accounts
+            }catch {
+                print(error)
+            }
         }
     }
     
@@ -68,11 +74,22 @@ class HomeController: UIViewController,UITableViewDelegate,UITableViewDataSource
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: cellId)
-        cell.textLabel?.text = "Little sit and Chueng"
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellId)
+        let account = self.accounts[indexPath.row]
+        cell.textLabel?.text = account.amounts
+        cell.detailTextLabel?.text = account.note
         return cell
     }
 
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let account = self.accounts[indexPath.row]
+        let id = account._id
+        // TODO: - show account detail
+//        let data = ["id":id] as [String:AnyObject]
+//        SitApplication.shared.getFromServer(path: "/account", data: data) { (data) in
+//            print(String(data: data, encoding: .utf8))
+//        }
+    }
 
 }
 
